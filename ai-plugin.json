@@ -1,0 +1,19 @@
+{
+  "schema_version": "v1",
+  "name_for_model": "yunpan_1yunpan",
+  "name_for_human": "1yunpan S3",
+  "description_for_model": "Manage files in a 1yunpan.com S3-compatible bucket.",
+  "description_for_human": "Manage your 1yunpan files.",
+  "auth": {
+    "type": "service_http",
+    "authorization_type": "bearer"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://YOUR-DOMAIN.example.com/openapi.yaml",
+    "has_user_authentication": false
+  },
+  "logo_url": "https://s3.1yunpan.com/favicon.ico",
+  "contact_email": "",
+  "legal_info_url": ""
+}

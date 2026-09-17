@@ -1,0 +1,204 @@
+openapi: 3.1.0
+info:
+  title: 1yunpan GPT Action API
+  version: 1.1.0
+  description: Manage files in a 1yunpan.com S3-compatible bucket through a secure proxy.
+
+servers:
+  - url: https://YOUR-DOMAIN.example.com
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+  schemas:
+    CopyMove:
+      type: object
+      required:
+        - source
+        - destination
+      properties:
+        source:
+          type: string
+          description: Exact source object key.
+        destination:
+          type: string
+          description: Exact destination object key.
+
+    TextUpload:
+      type: object
+      required:
+        - key
+        - content
+      properties:
+        key:
+          type: string
+          description: Destination object key.
+        content:
+          type: string
+          description: UTF-8 text to store.
+        content_type:
+          type: string
+          default: text/plain; charset=utf-8
+
+paths:
+  /files:
+    get:
+      operationId: listFiles
+      summary: List files and directories
+      parameters:
+        - name: prefix
+          in: query
+          schema:
+            type: string
+            default: ""
+        - name: recursive
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+      responses:
+        "200":
+          description: File and directory list.
+    delete:
+      operationId: deleteFile
+      summary: Delete a file or object
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted successfully.
+
+  /search:
+    get:
+      operationId: searchFiles
+      summary: Search filenames
+      parameters:
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: prefix
+          in: query
+          schema:
+            type: string
+            default: ""
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+      responses:
+        "200":
+          description: Matching files.
+
+  /files/info:
+    get:
+      operationId: getFileInfo
+      summary: Get file metadata
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Object metadata.
+
+  /files/download-url:
+    get:
+      operationId: getDownloadUrl
+      summary: Generate a temporary download URL
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: expires
+          in: query
+          schema:
+            type: integer
+            minimum: 60
+            maximum: 604800
+            default: 3600
+      responses:
+        "200":
+          description: Temporary presigned URL.
+
+  /files/upload-text:
+    post:
+      operationId: uploadText
+      summary: Upload UTF-8 text as a file
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TextUpload"
+      responses:
+        "200":
+          description: Uploaded successfully.
+
+  /files/folder:
+    post:
+      operationId: createFolder
+      summary: Create a directory marker
+      parameters:
+        - name: prefix
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Folder created.
+
+  /files/copy:
+    post:
+      operationId: copyFile
+      summary: Copy an object
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CopyMove"
+      responses:
+        "200":
+          description: Copied successfully.
+
+  /files/move:
+    post:
+      operationId: moveFile
+      summary: Move or rename an object
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CopyMove"
+      responses:
+        "200":
+          description: Moved successfully.
